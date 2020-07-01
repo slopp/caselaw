@@ -1,0 +1,17 @@
+Package: caselaw
+Type: Package
+Title: Access the Harvard Case Law API
+Version: 0.1.0
+Author: Sean Lopp
+Maintainer: Sean Lopp <lopp.sean@gmail.com>
+Description: Functions to access case data, including full case opinion transcripts
+    using the Harvard Case Law API at https://case.law.
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Imports: 
+    R6,
+    tibble,
+    httr,
+    purrr
+RoxygenNote: 7.0.2
