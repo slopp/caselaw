@@ -3,3 +3,4 @@
 export(cl_client)
 export(cl_get_case_opinions)
 export(cl_get_cases)
+export(cl_get_courts)

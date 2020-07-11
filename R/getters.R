@@ -3,12 +3,13 @@
 #'
 #' @param search A search term or phrase, case metadata and text is searched
 #' @param jurisdiction A jurisdiction slug, eg. "ill" or "us". TODO: cl_get_jurisdictions()
-#' @param court A court slug. TODO: cl_get_courts()
+#' @param court A court slug, see: \link{cl_get_courts}
 #' @param reporter A reporter id. TODO: cl_get_reporters()
 #' @param docket_number A string with the docket number
 #' @param decision_date_max Max search date in YYYY-MM-DD
 #' @param decision_date_min Min search date in YYYY-MM-DD
 #' @param name_abbreviation Case name abbreviation as a string
+#' @param limit Maximum number of search pages to return
 #'
 #' @return tidy metadata about matching cases, with an emphasis on context not publication info
 #' @export
@@ -19,20 +20,22 @@ cl_get_cases <- function(search = NULL,
                          docket_number = NULL,
                          decision_date_max = NULL,
                          decision_date_min = NULL,
-                         name_abbreviation = NULL) {
+                         name_abbreviation = NULL,
+                         limit = Inf) {
 
   # construct query list
   params <- compact(list(search = search, jurisdiction = jurisdiction,
                          court = court, reporter = reporter,
                          docket_number = docket_number,
                          decision_date_max = decision_date_max,
+                         decision_date_min = decision_date_min,
                          name_abbreviation = name_abbreviation))
 
   # create client
   cl <- cl_client$new()
   path <- cl$add_url_params("cases", params)
-  results <- cl$GET_PAGES(path)
-  res <- results$results
+  results <- cl$GET_PAGES(path, limit = limit)
+  res <- results
 
   # parse results
   tibble::tibble(
@@ -66,12 +69,24 @@ cl_get_case_opinions <- function(case_id){
   # flatten into a very wordy tibble
   tibble::tibble(
     case_id = case_id,
-    judges = purrr::simplify(res$judges),
+    judges = paste(purrr::simplify(res$judges), collapse = " "),
     attorneys = paste(purrr::simplify(res$attorneys), collapse = " "),
     head_matter  = res$head_matter,
-    author = purrr::map_chr(res$opinions, "author"),
-    text = purrr::map_chr(res$opinions, "text"),
-    type = purrr::map_chr(res$opinions, "type")
+    author = purrr::map_chr(res$opinions, "author", .default = "n/a"),
+    text = purrr::map_chr(res$opinions, "text", .default = "n/a"),
+    type = purrr::map_chr(res$opinions, "type", .default = "n/a")
   )
 
 }
+
+#' Get Courts
+#'
+#' @return A tidy dataframe with information on available courts in the API
+#' @export
+cl_get_courts <- function(){
+  cl <- cl_client$new()
+  results <- cl$GET_PAGES("courts/")
+  tibble::as_tibble(purrr::transpose(results))
+}
+
+

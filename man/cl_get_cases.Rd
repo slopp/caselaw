@@ -12,7 +12,8 @@ cl_get_cases(
   docket_number = NULL,
   decision_date_max = NULL,
   decision_date_min = NULL,
-  name_abbreviation = NULL
+  name_abbreviation = NULL,
+  limit = Inf
 )
 }
 \arguments{
@@ -20,7 +21,7 @@ cl_get_cases(
 
 \item{jurisdiction}{A jurisdiction slug, eg. "ill" or "us". TODO: cl_get_jurisdictions()}
 
-\item{court}{A court slug. TODO: cl_get_courts()}
+\item{court}{A court slug, see: \link{cl_get_courts}}
 
 \item{reporter}{A reporter id. TODO: cl_get_reporters()}
 
@@ -31,6 +32,8 @@ cl_get_cases(
 \item{decision_date_min}{Min search date in YYYY-MM-DD}
 
 \item{name_abbreviation}{Case name abbreviation as a string}
+
+\item{limit}{Maximum number of search pages to return}
 }
 \value{
 tidy metadata about matching cases, with an emphasis on context not publication info

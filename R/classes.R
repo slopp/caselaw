@@ -80,14 +80,16 @@ cl_client <- R6::R6Class(
       URLencode(path)
     },
 
-    GET_PAGES = function(path, writer = httr::write_memory(), parser = "parsed") {
+    GET_PAGES = function(path, writer = httr::write_memory(), parser = "parsed", limit = Inf) {
       results <- list()
       res <- self$GET(path, writer, parser)
+
+      results <- append(results, res$results)
       c <- 0
-      results <- append(results, res)
-      while (!is.null(res$`next`) && c < 5) {
+      while (!is.null(res$`next`) && c < limit) {
         res <- self$GET_URL(res$`next`, writer, parser)
-        c <- c+1
+        results <- append(results, res$results)
+        c <- c + 1
       }
       results
     },

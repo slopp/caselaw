@@ -78,7 +78,12 @@ use it to authorize all requests
 \if{html}{\out{<a id="method-GET_PAGES"></a>}}
 \subsection{Method \code{GET_PAGES()}}{
 \subsection{Usage}{
-\if{html}{\out{<div class="r">}}\preformatted{cl_client$GET_PAGES(path, writer = httr::write_memory(), parser = "parsed")}\if{html}{\out{</div>}}
+\if{html}{\out{<div class="r">}}\preformatted{cl_client$GET_PAGES(
+  path,
+  writer = httr::write_memory(),
+  parser = "parsed",
+  limit = Inf
+)}\if{html}{\out{</div>}}
 }
 
 }
