@@ -1,0 +1,147 @@
+---
+title: "Example Analysis using tidytext and caselaw"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{example_analysis}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+```{r setup}
+library(dplyr)
+library(ggplot2)
+library(tidytext)
+library(caselaw)
+```
+
+In this sample analysis, we'll demonstrate some simple techniques for pulling data from the [Harvard Case Law](https://case.law) API using the `caselaw` R package, and then we'll analyze that data using the `tidytext` framework. 
+
+# Simple Word Counts
+
+To begin, lets focus on looking at the Supreme Court opinions from the 2015 term. First, we'll look at what cases are available:
+
+```{r}
+cases <- cl_get_cases(
+  decision_date_min = "2015-10-01",
+  decision_date_max = "2016-06-30",
+  court = "us"
+)
+cases
+```
+
+Now that we have the case IDs we want, we can get the content of the opinions:
+
+```{r}
+opinions <- purrr:::map_df(cases$id, cl_get_case_opinions)
+```
+
+Let's look only at the cases where oral argument occurred:
+
+```{r}
+opinions_oa <- opinions %>% 
+  filter(judges != "") %>% 
+  left_join(cases, by = c("case_id" = "id")) %>% 
+  select(case_id, name_abbreviation, author, text, type)
+```
+
+Now we can use the `tidytext` package to transform the text of each opinion into a variety of tokens (words, n-grams, sentences) for further analysis. The default is to separate the massive `text` column into a tidy data frame with one row per word in each opinion. This creates a very tall data frame, but one that is easily amendable to analysis!
+
+```{r}
+words <- opinions_oa %>% 
+  unnest_tokens(word, text)
+head(words)
+```
+
+For example, we can now easily determine the word count of each opinion:
+
+```{r}
+words %>% 
+  group_by(case_id, author) %>% 
+  count()
+```
+Or we can compare the length by opinion type:
+
+```{r}
+words %>% 
+  group_by(type) %>% 
+  count()
+```
+
+To go a bit further, lets try to identify what words stand out in each of these cases. One technique for defining "stand out" is looking at the tf-idf, which is a measure of the importance of each word in the given documents. We can compare the majority opinions of all the cases to get a feel for what words are most important to each case.
+
+```{r}
+by_case <- words %>% 
+  filter(type == "majority") %>% 
+  count(name_abbreviation, word, sort = TRUE) %>% 
+  bind_tf_idf(word, name_abbreviation, n)
+
+by_case %>% 
+  group_by(name_abbreviation) %>% 
+  top_n(10, tf_idf) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, tf_idf)) %>%
+  ggplot(aes(word, tf_idf, fill = name_abbreviation)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  facet_wrap(~name_abbreviation, ncol = 2, scales = "free") +
+  coord_flip()
+  
+```
+
+Using a similar technique, we could look at the important words in the different opinions for one particular case:
+
+```{r}
+by_type <- words %>% 
+  filter(case_id == "12172942") %>% 
+  count(author, word, sort = TRUE) %>% 
+  bind_tf_idf(word, author, n)
+
+by_type %>% 
+  group_by(author) %>% 
+  top_n(10, tf_idf) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, tf_idf)) %>%
+  ggplot(aes(word, tf_idf, fill = author)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  facet_wrap(~author, ncol = 2, scales = "free") +
+  coord_flip()
+```
+
+We could repeat the same analysis above with `n-grams` instead of words with one single change. 
+
+```{r}
+tokens <- opinions_oa %>% 
+  unnest_tokens(word, text, token = "ngrams", n = 3)
+
+tokens %>% 
+  filter(type == "majority") %>% 
+  count(name_abbreviation, word, sort = TRUE) %>% 
+  bind_tf_idf(word, name_abbreviation, n)
+
+by_case %>% 
+  group_by(name_abbreviation) %>% 
+  top_n(10, tf_idf) %>% 
+  ungroup() %>%
+  mutate(word = reorder(word, tf_idf)) %>%
+  ggplot(aes(word, tf_idf, fill = name_abbreviation)) +
+  geom_col(show.legend = FALSE) +
+  labs(x = NULL, y = "tf-idf") +
+  facet_wrap(~name_abbreviation, ncol = 2, scales = "free") +
+  coord_flip()
+  
+```
+
+## Topic Analysis - By Judge
+
+A common 
+
+## Topic Analysis - By Citation Network
+
