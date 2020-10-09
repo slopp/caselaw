@@ -49,7 +49,7 @@ Many packages exist for further analysis of this text data, see `tidytext` for e
 The Case Law API is publicly accessible, but some capabilities are limited unless you register for an account and receive an API key. The details are covered extensively on the Case Law website. Once you have an API key, simply set an environment variable and it will be automatically used:
 
 ```
-Sys.setenv(CASE_LAW_API_KEY="YOUR_API_KEY)
+Sys.setenv(CASE_LAW_API_KEY="YOUR_API_KEY")
 ```
 
 We recommend adding the environment variable to a R environment file so it is automatically available in your session.
