@@ -51,7 +51,7 @@ opinions_oa <- opinions %>%
   select(case_id, name_abbreviation, author, text, type)
 ```
 
-Now we can use the `tidytext` package to transform the text of each opinion into a variety of tokens (words, n-grams, sentences) for further analysis. The default is to separate the massive `text` column into a tidy data frame with one row per word in each opinion. This creates a very tall data frame, but one that is easily amendable to analysis!
+Now we can use the `tidytext` package to transform the text of each opinion into a variety of tokens (words, n-grams, sentences) for further analysis. The default is to separate the massive `text` column into a tidy data frame with one row per word in each opinion. This creates a very tall data frame, but one that is useful for common NLP analysis!
 
 ```{r}
 words <- opinions_oa %>% 
@@ -74,7 +74,7 @@ words %>%
   count()
 ```
 
-To go a bit further, lets try to identify what words stand out in each of these cases. One technique for defining "stand out" is looking at the tf-idf, which is a measure of the importance of each word in the given documents. We can compare the majority opinions of all the cases to get a feel for what words are most important to each case.
+To go a bit further, lets try to identify which words stand out in each of these cases. One technique for defining "stand out" is looking at the tf-idf, which is a measure of the importance of each word relative to the word's frequency across documents. We can compare the majority opinions of all the cases to get a feel for what words are most important to each case.
 
 ```{r}
 by_case <- words %>% 
@@ -138,10 +138,4 @@ by_case %>%
   coord_flip()
   
 ```
-
-## Topic Analysis - By Judge
-
-A common 
-
-## Topic Analysis - By Citation Network
 
